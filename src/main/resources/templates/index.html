@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport"
+  content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="/acj/static/bootstrap/css/bootstrap.min.css"
+  integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+  crossorigin="anonymous">
+<link rel="stylesheet" href="/acj/static/codemirror/codemirror.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+<title>数据清洗 @ 短应用&trade;</title>
+<style>
+.fullsize {
+  margin-left: -1.25rem;
+  margin-right: -19px;
+}
+</style>
+</head>
+<body>
+<input type="hidden" id="username" name="username" th:value="${userinfo.name}">
+<input type="hidden" id="userbase64" name="userbase64" th:value="${userinfo.base64}">
+<div class="container-fluid">
+<p></p>
+<div class="row">
+<div class="col-12 d-flex justify-content-center">
+<h1>数据清洗 @ 短应用&trade; <span class="badge badge-warning"><i class="fas fa-satellite-dish fa-inverse"></i></span> <span class="badge badge-warning"><i class="fas fa-satellite fa-inverse"></i></span></h1>
+</div>
+</div>
+<div class="row">
+<div class="col-3">
+  <div class="card text-center" id="accordionDataController" style="display:none;">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" id="headingDataReceive" data-toggle="collapse" data-target="#collapseDataReceive" aria-expanded="true" aria-controls="collapseDataReceive"><i class="fas fa-satellite-dish"></i> 接收数据</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="headingDataCache" data-toggle="collapse" data-target="#collapseDataCache" aria-expanded="false" aria-controls="collapseDataCache"><i class="fas fa-database"></i> 数据缓存</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="headingDataBroadcast" data-toggle="collapse" data-target="#collapseDataBroadcast" aria-expanded="false" aria-controls="collapseDataBroadcast"><i class="fas fa-satellite"></i> 发送数据</a>
+        </li>
+      </ul>
+    </div>
+    <div class="card-body collapse show" id="collapseDataReceive" aria-labelledby="headingDataReceive" data-parent="#accordionDataController">
+      <h5 class="card-title">从支持数据发送的短应用&trade;接收到数据</h5>
+      <p class="card-text">支持发送数据的短应用&trade;将处理好的数据通过广播方式，向所有待接收端推送数据，接收数据的短应用&trade;打开接收数据雷达，即可实时接收到数据。</p>
+      <a href="#" class="btn btn-primary">打开雷达</a>
+      <p></p>
+      <h5 class="card-title">可用卫星 短应用&trade;</h5>
+      <ul class="list-group list-group-flush text-left fullsize" id="datasenders">
+      </ul>
+    </div>
+    <div class="card-body collapse" id="collapseDataCache" aria-labelledby="headingDataCache" data-parent="#accordionDataController">
+  <ul class="list-group list-group-flush text-left" id="datacache">
+  </ul>
+    </div>
+    <div class="card-body collapse" id="collapseDataBroadcast" aria-labelledby="headingDataBroadcast" data-parent="#accordionDataController">
+      <h5 class="card-title">从支持数据发送的短应用&trade;接收到数据</h5>
+      <p class="card-text">支持发送数据的短应用&trade;将处理好的数据通过广播方式，向所有待接收端推送数据，接收数据的短应用&trade;打开接收数据雷达，即可实时接收到数据。</p>
+      <a href="#" class="btn btn-primary">打开卫星</a>
+      <p></p>
+      <h5 class="card-title">可用雷达 短应用&trade;</h5>
+      <ul class="list-group list-group-flush text-left fullsize" id="datareceivers">
+      </ul>
+    </div>
+  </div>
+  <p></p>
+  <div class="card text-center" id="accordionRuleController">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" id="headingRules" data-toggle="collapse" data-target="#collapseRules" aria-expanded="true" aria-controls="collapseRules"><i class="fas fa-map"></i> 可用清洗规则</a>
+        </li>
+      </ul>
+    </div>
+    <div class="card-body collapse show" id="collapseRules" aria-labelledby="headingRules" data-parent="#accordionRuleController">
+      <h5 class="card-title">已设定的清洗规则</h5>
+      <p class="card-text">支持已设定的数据准入条件后台自动清洗, 选择可对指定清洗规则进行修改。</p>
+      <a href="/acj/rules/refresh" target="_blank" class="btn btn-success">刷新规则缓存</a>
+      <p></p>
+      <select class="custom-select custom-select-lg mb-3" id="rules">
+      </select>
+      <p class="card-text">自动清洗</p>
+			<div class="btn-group btn-group-toggle" id="rule-actived" data-toggle="buttons">
+			  <label class="btn btn-info active">
+			    <input type="radio" name="autoclean" id="autoclean-on" value="on" autocomplete="off" checked> 激活
+			  </label>
+			  <label class="btn btn-info">
+			    <input type="radio" name="autoclean" id="autoclean-off" value="off" autocomplete="off"> 禁止
+			  </label>
+			</div>
+      <p></p>
+      <p class="card-text" id="rule-description">无描述</p>
+      <a href="#" class="btn btn-danger" id="editRule">编辑规则</a>
+      <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#editruleModal">添加规则</a>
+      <p></p>
+    </div>
+  </div>
+</div>
+<div class="col-9 maxheight">
+<div class="d-flex flex-row">
+<p class="h2">待清洗数据</p>
+</div>
+<div class="d-flex flex-row">
+<pre id="source-json-renderer"></pre>
+</div>
+<div class="d-flex flex-row">
+<p id="data-wash-rule-title" class="h2">数据清洗规则 [规则ID]</p>
+</div>
+<div class="d-flex flex-row">
+<button type="button" class="btn btn-dark mr-2" id="save-clean">保存</button>
+<button type="button" class="btn btn-success mr-2" id="do-clean">执行</button>
+</div>
+<div class="d-flex flex-row">
+<p class="h2">允许清洗</p>
+</div>
+<div class="d-flex flex-row">
+<div id="data-should-wash-logical" class="w-100"></div>
+</div>
+<div class="d-flex flex-row">
+<p class="h2">清洗逻辑</p>
+</div>
+<div class="d-flex flex-row">
+<div id="data-wash-logical" class="w-100"></div>
+</div>
+<div class="d-flex flex-row">
+<p class="h2">清洗结果</p>
+</div>
+<div class="d-flex flex-row">
+<button type="button" class="btn btn-success" id="senddata">发送数据</button>
+</div>
+<div class="d-flex flex-row">
+<pre id="result-json-renderer"></pre>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="editruleModal" tabindex="-1" role="dialog" aria-labelledby="editruleModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editruleModalTitle">清洗与转换规则</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="newRuleForm" class="needs-validation" novalidate>
+          <input type="hidden" id="_id" value="">
+				  <div class="form-row">
+				    <div class="form-group col-md-4">
+				      <label for="inputCity">ID</label>
+				      <input type="text" class="form-control" id="rule-id" required>
+				    </div>
+				    <div class="form-group col-md-8">
+				      <label for="inputZip">名称</label>
+				      <input type="text" class="form-control" id="rule-name" required>
+				    </div>
+				  </div>
+          <div class="form-group">
+            <label for="message-text" class="col-form-label">描述</label>
+            <textarea class="form-control" id="rule-description" rows="7" required></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-primary" id="saveOrNew">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/acj/static/jquery/js/jquery.min.js"></script>
+<script src="/acj/static/json-viewer/jquery.json-viewer.js"></script>
+<script src="/acj/static/codemirror/codemirror.js"></script>
+<script src="/acj/static/codemirror/javascript/javascript.js"></script>
+<script src="/acj/static/bootstrap/js/bootstrap.min.js"
+  integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+  crossorigin="anonymous"></script>
+<script type="text/javascript">
+$(function() {
+  var autoheight = function() {
+    var winHeight = $(window).innerHeight();
+    var exactHeight = 0;
+    var siblings = $(".maxheight").parent().siblings();
+    
+    for (var si in siblings) {
+      var sibling = siblings[si];
+      if (sibling.nodeName !== 'NAV' 
+          && sibling.nodeName !== 'DIV'
+            && sibling.nodeName !== 'P') {
+        continue;
+      }
+      
+      exactHeight += ($(sibling).outerHeight() === undefined ? 0 : $(sibling).outerHeight());
+    }
+    
+    $(".maxheight").css("height", (winHeight - exactHeight - 20) + "px");
+  };
+  
+  $(window).resize(autoheight);
+  autoheight();
+  
+  var datacontroller = function(target) {
+    $(target).on('show.bs.collapse', function(event) {
+      var head = $(this).attr("aria-labelledby");
+      $("#" + head).addClass("active");
+    });
+    $(target).on('hidden.bs.collapse', function(event) {
+      var head = $(this).attr("aria-labelledby");
+      $("#" + head).removeClass("active");
+    });
+  };
+  datacontroller("#accordionDataController .collapse");
+  
+  var myCodeMirrorShould = CodeMirror(document.getElementById('data-should-wash-logical'), {
+    value: "function shouldclean(datasource) \n{\n  var result = {};\n  // filter source code here start\n  \n  // filter source code here end\n  return false;\n}\n",
+    mode:  "javascript"
+  });
+  
+  var myCodeMirror = CodeMirror(document.getElementById('data-wash-logical'), {
+    value: "function clean(datasource) \n{\n  var result = {};\n  // filter source code here start\n  \n  // filter source code here end\n  return result;\n}\n",
+    mode:  "javascript"
+  });
+  
+  var loadRule = function(rule) {
+    $("#data-wash-rule-title").text(rule["rule-name"] + " [" + rule["rule-id"] + "]");
+    myCodeMirrorShould.setValue(rule["rule-shouldclean"]);
+    myCodeMirror.setValue(rule["rule-clean"]);
+  }
+  
+  $('#editruleModal').on('hidden.bs.modal', function (e) {
+	    $("#newRuleForm")[0].reset();
+  })
+  
+  var cleanrules = function(target) {
+    $.get('/acj/manage/data/rules/get', function(rulesjson) {
+      var selection = true;
+
+      var rules = {};
+      for (var ruleid in rulesjson.rules) {
+        var rule = rulesjson.rules[ruleid];
+        rules[rule["rule-id"]] = rule;
+        
+        var ruleselection = '';
+        if (selection && rule["rule-id"] === 'default') {
+          ruleselection = $("<option value=\"" + rule["rule-id"] + "\" selected><i class=\"far fa-map\"></i> " + rule["rule-name"] + "</option>");
+          selection = false;
+          loadRule(rule);
+        } else {
+          ruleselection = $("<option value=\"" + rule["rule-id"] + "\"><i class=\"far fa-map\"></i> " + rule["rule-name"] + "</option>");
+        }
+
+        $(target).append(ruleselection);
+      }
+      $(target).bind("change", function() {
+        var rules = $(this).data("rules");
+        var rule = rules[$(this).val()];
+        
+        var description = rule["rule-description"];
+        
+        if (description === undefined || description === '') {
+          description = '无描述';
+        }
+        
+        $(this).parent().find("#rule-description").text(description);
+        
+        var autoclean = rule["rule-actived"];
+        autoclean = (autoclean === undefined || typeof autoclean !== 'boolean' ? false : autoclean);
+        
+        if (autoclean) {
+          $("#rule-actived input:radio[name=autoclean]#autoclean-on")[0].checked = true;
+          $("#rule-actived input:radio[name=autoclean]#autoclean-off").parent().removeClass("active");
+          $("#rule-actived input:radio[name=autoclean]#autoclean-on").parent().addClass("active");
+        } else {
+          $("#rule-actived input:radio[name=autoclean]#autoclean-off")[0].checked = true;
+          $("#rule-actived input:radio[name=autoclean]#autoclean-on").parent().removeClass("active");
+          $("#rule-actived input:radio[name=autoclean]#autoclean-off").parent().addClass("active");
+        }
+        
+        loadRule(rule);
+      });
+
+      $(target).data("rules", rules);
+    }, 'json');
+  }
+  cleanrules("#accordionRuleController #rules");
+  
+  $.extend({
+    loadsourcedata: function(result) {
+	    if (result === undefined) {
+	      result = {test: 'test'};
+	    }
+	    
+	    var options = {
+        collapsed: true,
+        withQuotes: true
+      };
+      $('#source-json-renderer').jsonViewer(result, options);
+      $('#source-json-renderer').data("sourcedata", result);
+    }
+  });
+  
+  $.loadsourcedata();
+  
+  var cleancontroller = function() {
+    $("input:radio[name=autoclean]").bind("change", function() {
+      var rules = $("#accordionRuleController #rules").data("rules");
+      var rule = rules[$("#accordionRuleController #rules").val()];
+      
+      var autoclean = rule["rule-actived"];
+      autoclean = (autoclean === undefined || typeof autoclean !== 'boolean' ? false : autoclean);
+      
+      var actived = $("#rule-actived input:radio[name=autoclean]:checked").val();
+      
+      var rulechanged = rule;
+      rulechanged["_id"] = rule["_id"];
+      rulechanged["rule-actived"] = (actived === 'on');
+      
+      $.ajax({
+        url: window.location.protocol + "//" + window.location.host + '/acj/manage/data/rules/save',
+        data: JSON.stringify(rulechanged),
+        contentType: "application/json;charset=UTF-8",
+        type: "post",
+        dataType: 'json',
+        success: function(result) {
+          console.log(result);
+          if (result["_id"] !== undefined) {
+            rules[result["rule-id"]] = result;
+            $("#accordionRuleController #rules").data("rules", rules);
+          } else {
+            alert("设置失败");
+          }
+        }
+      });
+
+    });
+    
+    $("#editRule").bind("click", function() {
+      var rules = $("#accordionRuleController #rules").data("rules");
+      var rule = rules[$("#accordionRuleController #rules").val()];
+      
+      $("#newRuleForm > input#_id").val(rule["_id"]);
+      $("#newRuleForm input#rule-id").val(rule["rule-id"]);
+      $("#newRuleForm input#rule-name").val(rule["rule-name"]);
+      $("#newRuleForm textarea#rule-description").val(rule["rule-description"]);
+      
+      $("#editruleModal").modal('show');
+    });
+    
+    $("#saveOrNew").bind("click", function() {
+      var rule = {};
+      
+      var _id = $("#newRuleForm > input#_id").val();
+      var rule_id = $("#newRuleForm input#rule-id").val();
+      var rule_name = $("#newRuleForm input#rule-name").val();
+      var rule_description = $("#newRuleForm textarea#rule-description").val();
+      
+      if (_id === undefined || _id === '' || _id == null) {
+        // do nothing
+      } else {
+        rule["_id"] = _id;
+      }
+
+      if (rule_id === undefined || rule_id === '' || rule_id == null) {
+        $("#newRuleForm input#rule-id").removeClass("is-valid").addClass("is-invalid");
+      } else if (rule_name === undefined || rule_name === '' || rule_name == null) {
+        $("#newRuleForm input#rule-name").removeClass("is-valid").addClass("is-invalid");
+      } else if (rule_description === undefined || rule_description === '' || rule_description == null) {
+        $("#newRuleForm textarea#rule-description").removeClass("is-valid").addClass("is-invalid");
+      } else {
+        rule["rule-id"] = rule_id;
+        rule["rule-name"] = rule_name;
+        rule["rule-description"] = rule_description;
+        
+        $.ajax({
+          url: window.location.protocol + "//" + window.location.host + '/acj/manage/data/rules/save',
+          data: JSON.stringify(rule),
+          contentType: "application/json;charset=UTF-8",
+          type: "post",
+          dataType: 'json',
+          success: function(result) {
+            console.log(result);
+            if (result["_id"] !== undefined) {
+              rules[result["rule-id"]] = result;
+              $("#accordionRuleController #rules").data("rules", rules);
+              alert("保存成功");
+            } else {
+              alert("保存失败");
+            }
+          }
+        });
+      }
+      $("#newRuleForm").removeClass("needs-validation").addClass("was-validated");
+
+    });
+    
+    $("#save-clean").bind("click", function() {
+      var rule = {};
+      
+      var ruleselected = $("#accordionRuleController #rules").find("option:selected").val();
+      
+      rules = $("#accordionRuleController #rules").data("rules");
+      rule = rules[ruleselected];
+      
+      // 不保存自动清洗状态
+      delete rule["rule-actived"];
+      
+      rule["rule-shouldclean"] = myCodeMirrorShould.getValue();
+      rule["rule-clean"] = myCodeMirror.getValue();
+      
+      $.ajax({
+        url: window.location.protocol + "//" + window.location.host + '/acj/manage/data/rules/save',
+        data: JSON.stringify(rule),
+        contentType: "application/json;charset=UTF-8",
+        type: "post",
+        dataType: 'json',
+        success: function(result) {
+          console.log(result);
+          if (result["_id"] !== undefined) {
+            rules[result["rule-id"]] = result;
+            $("#accordionRuleController #rules").data("rules", rules);
+            alert("保存成功");
+          } else {
+            alert("保存失败");
+          }
+        }
+      });
+    });
+    
+    $("#do-clean").bind("click", function() {
+      var data = {};
+      
+      var sourcedata = $('#source-json-renderer').data("sourcedata");
+      if (sourcedata === undefined) {
+        data["data-src"] = {a: 'aaa'};
+      } else {
+        data["data-src"] = sourcedata;
+      }
+      data.username = $("#username").val();
+      data.shouldlogical = myCodeMirrorShould.getValue();
+      data.logical = myCodeMirror.getValue();
+      
+      $.ajax({
+        url: window.location.protocol + "//" + window.location.host + '/acj/manage/cleandata',
+        data: JSON.stringify(data),
+        contentType: "application/json;charset=UTF-8",
+        type: "post",
+        dataType: 'json',
+        success: function(result) {
+          console.log(result);
+          var options = {
+              collapsed: false,
+              withQuotes: true
+            };
+          $('#result-json-renderer').jsonViewer(result, options);
+          $('#result-json-renderer').data("resultdata", result);
+        }
+      });
+    });
+    
+    $("#senddata").bind("click", function() {
+      var checkedtarget = $("#datareceivers input:checkbox:checked");
+      for (var itarget = 0; itarget < checkedtarget.length; itarget++) {
+        var target = checkedtarget[itarget];
+        
+        var targetsrc = $(target).data("src");
+        
+        var resultdata = $('#result-json-renderer').data("resultdata");
+        resultdata["data-to"] = targetsrc;
+        
+        $.send(resultdata);
+      }
+    });
+    
+  }
+  
+  cleancontroller();
+});
+</script>
+<script src="/acj/static/vertx/js/sockjs.min.js"></script>
+<script src="/acj/static/vertx/js/vertx-eventbus.js"></script>
+<script type="text/javascript">
+$(function() {
+  var siblings = {};
+  /*
+  var eb = new EventBus(window.location.protocol + "//" + window.location.host + '/acj/eventbus');
+  eb.enableReconnect(false);
+  
+  $.extend({
+    send: function(data) {
+      var userbase64 = $("#userbase64").val();
+      
+      eb.send('sockjsclientin@' + userbase64, {type: 'broadcast', username: $("#username").val(), payload: data});
+    },
+    online: function() {
+      var userbase64 = $("#userbase64").val();
+      
+      eb.send('sockjsclientin@' + userbase64, {type: 'online', username: $("#username").val()});
+      
+      //if (offline === undefined) {
+        //var offline = setInterval($.offline, 1000 * 30);
+      //}
+    },
+    offline: function() {
+      $("#datareceivers > li").removeClass("text-success");
+      $("#datareceivers > li").addClass("text-dark");
+      $("#datasenders > li").removeClass("text-success");
+      $("#datasenders > li").addClass("text-dark");
+    }
+  });
+  */
+  var prependreceivers = function(jsondata) {
+    var receiver = $("    <li class=\"list-group-item text-success\" id=\"" +
+        siblings[jsondata["data-src"]] +
+        "\">" +
+        "<form class=\"form-inline\">" +
+        "<div class=\"custom-control custom-checkbox\">" +
+        "  <input type=\"checkbox\" class=\"custom-control-input receiver-selection\" data-src=\"" + jsondata["data-src"] + "\" id=\"cc-receiver-" + jsondata["data-src"] + "\">" +
+        "  <label class=\"custom-control-label\" for=\"cc-receiver-" + jsondata["data-src"] + "\">" +
+        "    <i class=\"fas fa-satellite-dish\"></i> " +
+        jsondata["data-src"] +
+        "  </label>" +
+        "</div>" +
+        "</form>" +
+        "</li>");
+    $("#datareceivers").prepend(receiver);
+  }
+  
+  var prependsenders = function(jsondata) {
+    var sender = $("    <li class=\"list-group-item text-success\" id=\"" +
+        siblings[jsondata["data-src"]] +
+        "\">" +
+        "<form class=\"form-inline\">" +
+        "<div class=\"custom-control custom-checkbox\">" +
+        "  <input type=\"checkbox\" class=\"custom-control-input sender-selection\" data-src=\"" + jsondata["data-src"] + "\" id=\"cc-sender-" + jsondata["data-src"] + "\">" +
+        "  <label class=\"custom-control-label\" for=\"cc-sender-" + jsondata["data-src"] + "\">" +
+        "    <i class=\"fas fa-satellite\"></i> " +
+        jsondata["data-src"] +
+        "  </label>" +
+        "</div>" +
+        "</form>" +
+        "</li>");
+    $("#datasenders").prepend(sender);
+  }
+  /*
+  eb.onopen = function() {
+
+    var userbase64 = $("#userbase64").val();
+    
+    // set a handler to receive a message
+    eb.registerHandler('sockjsclientout@' + userbase64, function(error, message) {
+      console.log('received a message: ' + JSON.stringify(message));
+      var result = {};
+      result["data-src"] = message.body["data-src"];
+      result["data-direction"] = message.body["data-direction"];
+      result["type"] = message.body["type"];
+      
+      if (siblings[result["data-src"]] === undefined) {
+        siblings[result["data-src"]] = result["data-direction"];
+
+        if (result["data-direction"].indexOf("sender") > -1) {
+          prependsenders(result);
+        }
+        
+        if (result["data-direction"].indexOf("receiver") > -1) {
+          prependreceivers(result);
+        }
+      } else {
+        $("#datareceivers > #" + siblings[result["data-src"]]).addClass("text-success");
+        $("#datareceivers > #" + siblings[result["data-src"]]).removeClass("text-dark");
+        $("#datasenders > #" + siblings[result["data-src"]]).addClass("text-success");
+        $("#datasenders > #" + siblings[result["data-src"]]).removeClass("text-dark");
+      }
+
+      if (result["type"] === 'broadcast') {
+        result["payload"] = message.body["payload"];
+
+        if (result["payload"] !== undefined) {
+          $.loadsourcedata(result["payload"]);
+        }
+      }
+    });
+
+    $.online();
+    setInterval($.online, 1000 * 30);
+
+  }*/
+});
+</script>
+</body>
+</html>
