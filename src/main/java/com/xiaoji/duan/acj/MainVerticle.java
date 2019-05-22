@@ -294,6 +294,9 @@ public class MainVerticle extends AbstractVerticle {
 							shouldlogicalengine.eval(shouldlogical);
 							logicalengine.eval(logical);
 						} catch (Exception e) {
+							System.out.println(ruleId + " scripts:");
+							System.out.println(shouldlogical);
+							System.out.println(logical);
 							e.printStackTrace();
 							shouldlogicalengine = null;
 							logicalengine = null;
