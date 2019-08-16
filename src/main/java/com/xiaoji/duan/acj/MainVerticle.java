@@ -365,7 +365,9 @@ public class MainVerticle extends AbstractVerticle {
 						JsonObject nextctx = new JsonObject().put("context", new JsonObject().put("cleaned", nexto));
 
 						MessageProducer<JsonObject> producer = bridge.createProducer(nextTask);
-						producer.send(new JsonObject().put("body", nextctx));
+						producer.send(new JsonObject().put("body", nextctx));						producer.end();
+						producer.end();
+
 						System.out.println("Consumer " + consumer + " send to [" + nextTask + "] result [" + nextctx.size() + "]");
 					} else {
 						handler.cause().printStackTrace();
@@ -374,6 +376,8 @@ public class MainVerticle extends AbstractVerticle {
 
 						MessageProducer<JsonObject> producer = bridge.createProducer(nextTask);
 						producer.send(new JsonObject().put("body", nextctx));
+						producer.end();
+
 						System.out.println("Consumer " + consumer + " send to [" + nextTask + "] result [" + nextctx.size() + "]");
 					}
 				});
@@ -405,6 +409,8 @@ public class MainVerticle extends AbstractVerticle {
 
 				MessageProducer<JsonObject> producer = bridge.createProducer(nextTask);
 				producer.send(new JsonObject().put("body", nextctx));
+				producer.end();
+
 				System.out.println("Consumer " + consumer + " send to [" + nextTask + "] result [" + nextctx.size() + "]");
 			}
 		} catch (Exception e) {
@@ -430,6 +436,8 @@ public class MainVerticle extends AbstractVerticle {
 			MessageProducer<JsonObject> producer = bridge.createProducer("acz");
 			producer.send(new JsonObject().put("body", new JsonObject().put("op", "send")
 					.put("address", dataTo + "." + base64key).put("payload", received)));
+			producer.end();
+
 		}
 
 		if (received.containsKey("type") && "online".equals(received.getString("type").toLowerCase())) {
@@ -454,6 +462,8 @@ public class MainVerticle extends AbstractVerticle {
 			MessageProducer<JsonObject> producer = bridge.createProducer("acz");
 			producer.send(new JsonObject().put("body",
 					new JsonObject().put("op", "publish").put("address", base64key).put("payload", received)));
+			producer.end();
+
 		}
 	}
 
