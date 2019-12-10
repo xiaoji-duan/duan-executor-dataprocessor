@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.script.Invocable;
@@ -251,6 +252,19 @@ public class MainVerticle extends AbstractVerticle {
 
 		try {
 			datasource = data.getJsonObject("context").getJsonObject("datasource", new JsonObject());
+			
+			// 查找是否有合并参数 merge_XXXX
+			Set<String> keys = data.getJsonObject("context").fieldNames();
+			
+			for (String key : keys) {
+				if (key.startsWith("merge_")) {
+					String variable = key.replace("merge_", "");
+					Object value = data.getJsonObject("context").getValue(key);
+					
+					datasource.put(variable, value);
+				}
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
